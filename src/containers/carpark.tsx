@@ -92,8 +92,8 @@ export const Carpark: React.FC = () => {
   const carparkType: keyof DisplayDataType | any[] = [
     "small",
     "medium",
-    "large",
     "big",
+    "large",
   ];
 
   const handlers = {
