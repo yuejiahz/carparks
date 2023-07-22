@@ -1,0 +1,31 @@
+.card-container {
+  display: flex;
+  row-gap: 5px;
+  column-gap: 5px;
+  justify-content: space-around;
+  position: relative;
+  top: 100px;
+  width: 100vw;
+  height: 80vh;
+}
+
+.card-width {
+  width: 20%;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.number {
+  font-size: 2em;
+}
+
+.title {
+  position: relative;
+  top: 60px;
+}
+
+.margin-bottom {
+  margin-bottom: 6px;
+}
