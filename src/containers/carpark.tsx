@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 //internal imports
 import "./carpark.css";
@@ -96,6 +96,7 @@ export const Carpark: React.FC = () => {
     "large",
   ];
   const API_CALL_INTERVAL_IN_MILLISECONDS = 60000;
+  const ref = useRef(false);
 
   const handlers = {
     getData: async () => {
@@ -106,6 +107,8 @@ export const Carpark: React.FC = () => {
           const dataArray = rs?.data?.items[0]?.carpark_data;
           const dataLength = rs?.data?.items[0]?.carpark_data?.length;
           let calculated = [];
+
+          //loop data
           while (dataLength >= count) {
             const totalLotsAvailable = dataArray[count]?.carpark_info.reduce(
               (total: number, carparkItem: DataItemType) =>
@@ -138,13 +141,22 @@ export const Carpark: React.FC = () => {
   };
 
   useEffect(() => {
-    handlers.getData();
-  }, []);
+    //render only once at start
+    if (ref.current) {
+      handlers.getData();
+    }
+    ref.current = true;
 
-  setInterval(function () {
-    console.count("a");
-    handlers.getData();
-  }, API_CALL_INTERVAL_IN_MILLISECONDS);
+    //start intervals call by 60s interval
+    const interval = setInterval(
+      handlers.getData,
+      API_CALL_INTERVAL_IN_MILLISECONDS
+    );
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <>
