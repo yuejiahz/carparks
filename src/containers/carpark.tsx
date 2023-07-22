@@ -95,18 +95,18 @@ export const Carpark: React.FC = () => {
     "big",
     "large",
   ];
+  const API_CALL_INTERVAL_IN_MILLISECONDS = 60000;
 
   const handlers = {
     getData: async () => {
       await axios
         .get("https://api.data.gov.sg/v1/transport/carpark-availability")
         .then((rs) => {
-          console.log(rs);
           let count = 0;
           const dataArray = rs?.data?.items[0]?.carpark_data;
           const dataLength = rs?.data?.items[0]?.carpark_data?.length;
           let calculated = [];
-          while (15 >= count) {
+          while (dataLength >= count) {
             const totalLotsAvailable = dataArray[count]?.carpark_info.reduce(
               (total: number, carparkItem: DataItemType) =>
                 (total += Number(carparkItem?.lots_available)),
@@ -118,6 +118,7 @@ export const Carpark: React.FC = () => {
             });
             count++;
           }
+          //sort lots in descending order
           calculated.sort(function (a, b) {
             return b.lotsAvailable - a.lotsAvailable;
           });
@@ -139,6 +140,11 @@ export const Carpark: React.FC = () => {
   useEffect(() => {
     handlers.getData();
   }, []);
+
+  setInterval(function () {
+    console.count("a");
+    handlers.getData();
+  }, API_CALL_INTERVAL_IN_MILLISECONDS);
 
   return (
     <>
