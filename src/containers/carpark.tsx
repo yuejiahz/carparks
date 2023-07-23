@@ -46,7 +46,7 @@ const findIndexRanges = (carparkArray: SortedCarparkType[]) => {
   const bigIndex = carparkArray.findIndex(
     (item: SortedCarparkType) => item.lotsAvailable < 400
   );
-  const totalIndex = carparkArray.length;
+  const totalIndex = carparkArray.length - 1;
   return [smallIndex, mediumIndex, bigIndex, totalIndex];
 };
 
@@ -62,27 +62,29 @@ const getCarparkListsByCategory = (
 };
 
 const formatData = (data: CarparkType, category: keyof CarparkType) => {
+  const lastIndex = data?.[category].length - 1;
+  const highestLot = data?.[category][0]?.lotsAvailable;
+  const lowestLot = data[category][lastIndex]?.lotsAvailable;
+
+  const highestLotsCarparkNumber = data?.[category]
+    .filter((lot) => lot.lotsAvailable === highestLot)
+    .reduce((total, item) => {
+      return (total += item?.carparkNumber + ", ");
+    }, "");
+
+  const lowestLotsCarparkNumber = data?.[category]
+    .filter((lot) => lot.lotsAvailable === lowestLot)
+    .reduce((total, item) => {
+      return (total += item?.carparkNumber + ", ");
+    }, "");
   return {
     highest: {
-      lotNumber: data?.[category][0]?.lotsAvailable,
-      carparkNumber: data?.[category][0]?.carparkNumber,
+      lotNumber: highestLot,
+      carparkNumber: highestLotsCarparkNumber.slice(0, -1),
     },
     lowest: {
-      lotNumber: data?.[category]?.reduce(
-        (total, item, index) =>
-          index !== 1 ? (total += item?.lotsAvailable) : total,
-        0
-      ),
-      carparkNumber: data?.[category]?.reduce((total, item, index) => {
-        const lastIndex = data?.[category].length - 1;
-        if (index !== 1 && index !== lastIndex) {
-          return (total += item?.carparkNumber + ", ");
-        } else if (index === lastIndex) {
-          return (total += item?.carparkNumber);
-        } else {
-          return "";
-        }
-      }, ""),
+      lotNumber: lowestLot,
+      carparkNumber: lowestLotsCarparkNumber.slice(0, -1),
     },
   };
 };
@@ -125,6 +127,8 @@ export const Carpark: React.FC = () => {
           calculated.sort(function (a, b) {
             return b.lotsAvailable - a.lotsAvailable;
           });
+
+          //get indexes and split arrays by category
           const indexRanges: number[] = findIndexRanges(calculated);
           const carparkCategories: CarparkType = getCarparkListsByCategory(
             calculated,
@@ -162,10 +166,10 @@ export const Carpark: React.FC = () => {
     <>
       <h1 className="align-center title">CARPARK AVAILABLE LOTS</h1>
       <div className="card-container">
-        {carparkType.map((type: keyof DisplayDataType) => {
+        {carparkType.map((type: keyof DisplayDataType, index: number) => {
           return (
             data && (
-              <div className="card-width">
+              <div className="card-width" key={index}>
                 <Card>
                   <div className="align-center">
                     <h3>{type.toUpperCase()}</h3>
@@ -173,7 +177,9 @@ export const Carpark: React.FC = () => {
                       <b>Highest</b>
                     </div>
                     <div className="number">
-                      {data[type]?.highest.lotNumber || 0}
+                      {typeof data[type]?.highest.lotNumber === "number"
+                        ? data[type]?.highest.lotNumber
+                        : "-"}
                     </div>
                     {data[type]?.highest.carparkNumber || "-"}
                   </div>
@@ -185,7 +191,9 @@ export const Carpark: React.FC = () => {
                     </div>
 
                     <div className="number">
-                      {data[type]?.lowest?.lotNumber || 0}
+                      {typeof data[type]?.lowest?.lotNumber === "number"
+                        ? data[type]?.lowest?.lotNumber
+                        : "-"}
                     </div>
                     {data[type]?.lowest?.carparkNumber || "-"}
                   </div>
